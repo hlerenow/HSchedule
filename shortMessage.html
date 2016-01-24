@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>HL</title>
+		<script type="text/javascript" src="./js/jquery.1.10.2.min.js"></script>
+		<script type="text/javascript" src="./js/json2.js"></script>
+        <script src="js/nwHelper.js" type="text/javascript"></script>
+		<script type="text/javascript" src="./js/H.js"></script>
+		<style type="text/css">
+
+
+		::selection {
+		    background: #F37336;
+		    color: #FFF;
+		}
+		/*滚动条宽度*/  
+		::-webkit-scrollbar {  
+		    width: 8px;  
+		}  
+		   
+		/* 轨道样式 */  
+		::-webkit-scrollbar-track {  
+		  
+		}  
+		   
+		/* Handle样式 */  
+		::-webkit-scrollbar-thumb {  
+		    border-radius: 10px;  
+		    background: rgba(255,255,255,0.2);   
+		}  
+		  
+		/*当前窗口未激活的情况下*/  
+		::-webkit-scrollbar-thumb:window-inactive {   
+		}  
+		  
+		/*hover到滚动条上*/  
+		::-webkit-scrollbar-thumb:vertical:hover{  
+
+		}  
+		/*滚动条按下*/  
+		::-webkit-scrollbar-thumb:vertical:active{  
+		    background: rgba(255,255,255,0.7);   
+		}  
+
+			*{
+				margin:0px;
+				padding: 0px;
+				outline: none;
+				font-family: "Arial";
+			}
+
+			html,body{
+		    border-width: 0px;
+		    outline: none;
+		    margin: 0;
+		    padding: 0;
+		    width: 100%;
+		    height: 100%;
+		    overflow: hidden;
+			}
+
+			table {
+				border-collapse:collapse;
+				border-spacing: 0;
+				width: 100%;
+			} 
+
+			body{
+				position: relative;
+			}
+
+
+			#dragBar{
+    			width: 100%;
+    			height: 25px;
+    			background-image: url(./image/bg_blue.png);
+    			color: white;
+				line-height: 25px;
+				font-weight: bold;
+				padding-left: 5px;
+				text-align: center;
+			}
+
+			#container{
+				width: 100%;
+				height: 325px;
+				overflow: auto;
+				border-radius:0px 0px 10px  10px;
+			}
+
+			#editContent{
+				color: #2C2E2F;
+				font-family:'Helvetica Neue', Helvetica, 微软雅黑, Arial, Verdana, sans-serif;
+				width: 100%;
+				height: 100%;
+				overflow: auto;
+				background-image: url(./image/paper.gif);
+			}
+
+			#editContent > p{
+				margin-right: 5px;
+				margin-left: 5px;
+				padding-top: 5px;
+			    padding-bottom: 2px;
+			    padding-left: 10px;
+			    padding-right: 5px;
+				word-spacing:1px;
+				line-height: 1.5;
+			}
+
+			#closeIcon{
+				position: absolute;
+				right: 0px;
+				top: 0px;
+				color: white;
+				text-align: center;
+				width: 25px;
+				height: 25px;
+				font-size: 21px;
+				font-weight: normal;
+				cursor: pointer;
+			}
+
+			#closeIcon:hover{
+				background-color: #226898;
+			}
+
+			#closeIcon img{
+				width: 13px;
+				height: 13px;
+				margin:6px 0px;
+			}
+
+			#more{
+				  /* border-radius: 15px; */
+				  position: absolute;
+				  left: 0px;
+				  top: 0px;
+				  color: white;
+				  text-align: center;
+				  width: 25px;
+				  height: 25px;
+				  line-height: 25px;
+				  font-size: 30px;
+				  /* font-weight: normal; */
+				  /* box-shadow: 0px 0px 1px 2px #525252,inset 0px 0px 1px 1px #463E3E; */
+				  cursor: pointer;
+			}
+
+			#more:hover{
+				background-color: #226898;
+			}
+
+
+			#dragBar span{
+				display: block;
+				margin: 0 auto;
+				max-width: 70%;
+				min-width: 100px;
+				height: 25px;
+				line-height: 25px;
+				overflow: hidden;
+			}
+
+		</style>
+	</head>
+	<body>
+		<div id="dragBar"><span >便签</span></div>
+		<div id="more">+</div>
+		<div id="closeIcon"><img src="./image/close_weight.png"></div>
+		<div id="container">
+			<div id="editContent" contenteditable="true">
+				<p class="lineCode">
+					hello world
+				</p>
+			</div>
+		</div>
+
+	</body>
+<script type="text/javascript">
+
+nwAppInit();
+
+var gui = require("nw.gui");
+var win = gui.Window.get();
+console.log(process);
+console.log(process.mainModule);
+console.log(process.mainModule.exports.allwindows.push(win));
+
+//窗口移动
+drag(win,"#dragBar,.as");
+//窗口移动 end
+
+//重调document的大小
+win.on("resize", function() {
+	var winWidth = win.width;
+	var winHeight = win.height;
+	$("#container").height(winHeight - 25 + "px");
+});
+
+win.on("blur", function() {
+	$("#editContent").attr("contenteditable", "false");
+	console.log("leave");
+});
+
+win.on("focus", function() {
+	$("#editContent").attr("contenteditable", "true");
+	console.log("in");
+});
+
+win.on("close", function() {
+	var fs=require("fs");
+	fs.exists("./config/shortMessageData.json", function(exists){
+		if(exists){
+			fs.readFile("./config/shortMessageData.json","UTF-8",function(err,data){
+				if(!err){
+					console.log(data);
+					var dataJSON=JSON.parse(data);
+					var hTitle=$("#dragBar span").html();
+					var hCotent=$("#editContent").html();
+					dataJSON.push({"id":"1",
+									"title":hTitle,
+									"date":H.getNowDateTime(),
+									"content":hCotent});
+					fs.writeFile("./config/shortMessageData.json",JSON.stringify(dataJSON),{encoding:"UTF-8"},function(err){
+						if(err){
+							alert("内容保存失败！！");
+						}
+						else{
+							win.close(true);
+						}
+					});
+					console.log();
+					//win=null;
+				}
+				else{
+					console.log("文件读取失败");
+				}
+			})
+		}
+	});
+});
+
+// 网页内事件
+
+// 在高亮处插入字符（模拟tab键插入，插入部分用space标签包含)
+function insertSelection(selection,character){
+	var nodet=document.createElement("space");
+	nodet.innerHTML=character;
+
+	if(!selection.isCollapsed){
+		selection.getRangeAt(0).deleteContents();
+	}
+	selection.getRangeAt(0).insertNode(nodet);
+	selection.addRange(selection.getRangeAt(0));
+	selection.modify("move", "right", "word");
+
+	selection.collapseToEnd();
+	selection.getRangeAt(0).collapse(true);
+}
+
+document.onkeydown = keyDownH;
+
+//删除行
+function keyDownH(e) {
+// 兼容FF和IE和Opera    
+	var theEvent = e || window.event;
+	var code = theEvent.keyCode || theEvent.which || theEvent.charCode;
+
+	if (code == 8) {
+		var len = $("#editContent > p").length;
+		if (len == 1 && $("#editContent > p").html() == "<br>") {
+			console.log("删除类型1");
+			return false;
+		} else if (len == 2 && $("#editContent > p:nth-child(2)").html() != "<br>" && $("#editContent > p:nth-child(1)").html() == "<br>") {
+			console.log("删除类型2");
+			$("#editContent > p:first-child").html($("#editContent > p:nth-child(2)").html());
+			$("#editContent > p:nth-child(2)").remove();
+			return false;
+		}
+	} else if (code == 9) {
+		var selection=window.getSelection();
+		insertSelection(selection,"&nbsp;&nbsp;&nbsp;&nbsp;");
+		return false;
+	}else if(code==13){
+		if($("#dragBar span").attr("contenteditable")=="true"){
+			return false;
+		}
+	}
+	return true;
+};
+
+
+$("#more").on("click", function() {
+	win2 = gui.Window.open(window.location.href, {
+		"width": 150,
+		"height": 400,
+		"transparent": true,
+		"frame": false,
+        "show_in_taskbar":false,
+		"toolbar": false
+	});
+});
+$("#dragBar span").on("dblclick", function() {
+	console.log("dbclick");
+	$(this).attr("contenteditable", "true");
+});
+
+$("#dragBar span").on("blur",function(){
+	$(this).attr("contenteditable", "false");	
+})
+
+
+$("#closeIcon").on("click", function() {
+	console.log("close");
+	win.close();
+});
+
+</script>
+</html>

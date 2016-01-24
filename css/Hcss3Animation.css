@@ -1,0 +1,90 @@
+.Hanimated{
+  -webkit-animation-duration: 1s;
+  animation-duration: 1s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+
+.Hanimated.infinite {
+  -webkit-animation-iteration-count: infinite;
+  animation-iteration-count: infinite;
+}
+.Hswing{
+animation-name: Hswing;
+animation-duration: 1s;
+animation-play-state: running;
+animation-timing-function:ease;
+}
+
+
+@keyframes Hswing{
+	0%{transform:scale(1,1);}
+	40%{transform:scale(1.25,0.75);}
+	50%{transform:scale(0.75,1.25);}
+	60%{transform:scale(1.15,0.85);}
+	70%{transform:scale(0.85,1.15);}
+	80%{transform:scale(1.05,0.95);}
+	90%{transform:scale(0.95,1.05);}
+	100%{transform:scale(1,1);}
+}
+
+.Hrotate{
+	animation-name:Hrotate;
+	animation-duration: 1s;
+	animation-play-state: running;
+	animation-timing-function:ease-out;
+}
+
+@keyframes Hrotate{
+	0%{
+		transform:rotate(-45deg);
+		transform-origin:left bottom;
+	}
+
+	20%{
+		transform:rotate(0deg);
+		transform-origin:left bottom;
+	}
+	30%{
+		transform:rotate(-20deg);
+		transform-origin:left bottom;
+	}
+	40%{
+		transform:rotate(0deg);
+		transform-origin:left bottom;
+	}
+	50%{
+		transform:rotate(-10deg);
+		transform-origin:left bottom;
+	}
+	60%{
+		transform:rotate(-0deg);
+		transform-origin:left bottom;
+	}
+	70%{
+		transform:rotate(-6deg);
+		transform-origin:left bottom;
+	}
+	80%{
+		transform:rotate(-0deg);
+		transform-origin:left bottom;
+	}
+	90%{
+		transform:rotate(-2deg);
+		transform-origin:left bottom;
+	}
+	100%{
+		transform:rotate(0deg);
+		transform-origin:left bottom;
+	}
+}
+
+.item{
+
+	width: 300px;
+	height: 150px;
+	background-color: orange;
+	border-radius: 10px;
+
+}
+
