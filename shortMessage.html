@@ -172,7 +172,7 @@
 		<div id="container">
 			<div id="editContent" contenteditable="true">
 				<p class="lineCode">
-					hello world
+					
 				</p>
 			</div>
 		</div>
@@ -183,10 +183,66 @@
 nwAppInit();
 
 var gui = require("nw.gui");
-var win = gui.Window.get();
-console.log(process);
-console.log(process.mainModule);
-console.log(process.mainModule.exports.allwindows.push(win));
+var win = gui.Window.get();//获得当前的窗口句柄
+var winId=000;//当前win在数组allWindows里的下标
+var allwindows=process.mainModule.exports.allWindows;
+
+// 主窗口关闭
+win.on("main-close",function(aa){
+	var fs=require("fs");
+	console.log("触发main-close");
+	fs.exists("./config/shortMessageData.json", function(exists){
+		if(exists){
+			try{
+
+				var data=fs.readFileSync(process.mainModule.exports.nwPath+"/config/shortMessageData.json","UTF-8");
+
+					console.log(data);
+					var dataJSON=JSON.parse(data);
+					var hTitle=$("#dragBar span").html();
+					var hCotent=$("#editContent").html();
+					dataJSON.push({"id":"1",
+									"title":hTitle,
+									"date":H.getNowDateTime(),
+									"content":hCotent});
+					fs.writeFileSync(process.mainModule.exports.nwPath+"/config/shortMessageData.json",JSON.stringify(dataJSON),{encoding:"UTF-8"});
+			
+			}
+			catch(ex){
+				console.log("文件读取失败");
+			}
+		};	
+	});
+	win.close(true);
+
+});
+
+// 初始化便签
+
+
+if(allwindows.length!=0){
+	for(var i=0;i<allwindows.length;i++){
+		if(win==allwindows[i].win){	
+			console.log("已存在窗口");	
+			winID=i;
+			$("#editContent").html(allwindows[i].news.content);
+			inWindowState=1;
+			break;
+		}
+
+		if(i==(allwindows.length-1)){
+			console.log("窗口压入 b");
+			process.mainModule.exports.allWindows.push({"win":win,"news":"{}"});
+			console.log(process.mainModule.exports.allWindows); 
+		};
+	}	
+}
+else{
+		console.log("窗口压入 c");
+		process.mainModule.exports.allWindows.push({"win":win,"news":"{}"});
+		console.log(process.mainModule.exports.allWindows); 	
+}
+console.log(allwindows);
 
 //窗口移动
 drag(win,"#dragBar,.as");
@@ -210,36 +266,18 @@ win.on("focus", function() {
 });
 
 win.on("close", function() {
-	var fs=require("fs");
-	fs.exists("./config/shortMessageData.json", function(exists){
-		if(exists){
-			fs.readFile("./config/shortMessageData.json","UTF-8",function(err,data){
-				if(!err){
-					console.log(data);
-					var dataJSON=JSON.parse(data);
-					var hTitle=$("#dragBar span").html();
-					var hCotent=$("#editContent").html();
-					dataJSON.push({"id":"1",
-									"title":hTitle,
-									"date":H.getNowDateTime(),
-									"content":hCotent});
-					fs.writeFile("./config/shortMessageData.json",JSON.stringify(dataJSON),{encoding:"UTF-8"},function(err){
-						if(err){
-							alert("内容保存失败！！");
-						}
-						else{
-							win.close(true);
-						}
-					});
-					console.log();
-					//win=null;
-				}
-				else{
-					console.log("文件读取失败");
-				}
-			})
+
+	if(allwindows.length!=0){
+		for(var i=0;i<allwindows.length;i++){
+			if(win==allwindows[i].win){
+				process.mainModule.exports.allWindows[i].win=null;
+				console.log(process.mainModule.exports.allWindows[i].win);
+				break;
+			}
 		}
-	});
+	}
+	win.close(true);
+
 });
 
 // 网页内事件

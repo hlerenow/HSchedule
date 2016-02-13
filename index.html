@@ -107,20 +107,57 @@
         </div>
     </body>
     <script>
-    // windows 事件
+// windows 事件
         var gui=require("nw.gui");
-        var win=gui.Window.get();
-        // drag(win,"#boxMenue");
+        var allwindows=process.mainModule.exports.allWindows;
+        win=gui.Window.get();
+        fs=require("fs");
 
+        // drag(win,"#boxMenue");
+        process.mainModule.exports.mainWindow=win;
         win.on("close",function(){
-            this.close(true);
+            if(allwindows.length!=0){
+                for(var i=0;i<allwindows.length;i++){
+                    if(allwindows[i].win!=null){
+                        allwindows[i].win.emit("main-close","222");                        
+                    }
+                    else{
+                        console.log("window is null");
+                    }
+                }
+            }
+           this.close(true);
         });
         nwAppInit();
+    //系统托盘事件
+
+    var tray;
+    // Show tray
+    tray = new gui.Tray({
+        icon: './image/favicon.png'
+    });
+    var trayCount=0;
+    // Show window and remove tray when clicked
+    tray.on('click', function() {
+        if(trayCount%2==1){
+            win.show();      
+        }
+        else{
+            win.hide();
+        }
+        trayCount++;
+        win.setPosition("center");
+    });    
+
+    // Get the minimize event
+    win.on('minimize', function() {
+        // Hide window
+        this.hide();
+    });
 
 
 
-
-    // 网页内事件
+// 网页内事件
 
     //当前li的位置
     var liPos=0;
@@ -162,38 +199,84 @@ $("#exit").on("click",function(){
 
 //便签事件
 $("#shortMessage").on("click",function(){
-    win2 = gui.Window.open("./shortMessage.html", {
-        "width": 150,
-        "height": 400,
-        "transparent": true,
-        "frame": false,
-        "toolbar": false,
-        "show_in_taskbar":false,
-    });    
+    // 便签为初始化时
+    if(process.mainModule.exports.smInintState==0){
+        console.log("smInintState");
+        fs.exists(process.mainModule.exports.nwPath+"/config/shortMessageData.json", function(exists){
+            if(exists){
+                fs.readFile(process.mainModule.exports.nwPath+"/config/shortMessageData.json","utf-8",function(err,data){
+                    if(!err){
+                        var dataJSON=JSON.parse(data);
+                        if(dataJSON.length!=0){
+                            console.log("json长度："+dataJSON.length);
+                            // 初始化便签 回显上次软件关闭时的便签
+                            console.log("便签初始化");
+                            for(var i=0;i<dataJSON.length;i++){
+                                var win2 = gui.Window.open("./shortMessage.html", {
+                                    "width": 150,
+                                    "height": 400,
+                                    "transparent": true,
+                                    "frame": false,
+                                    "toolbar": false,
+                                    "show_in_taskbar":false
+                                }); 
+                                process.mainModule.exports.smInintState=1;      
+                                console.log("窗口压入");                          
+                                process.mainModule.exports.allWindows.push({"win":win2,"news":dataJSON[i]});                                             
+                            }
+                            console.log("便签初始化打开窗口完成");
+                            console.log("重写jsonw文件");
+                            fs.writeFile(process.mainModule.exports.nwPath+"/config/shortMessageData.json", "[]", {
+                                encoding: "UTF-8"
+                            }, function(err) {
+                                if (err)
+                                    alert("内容保存失败！！");
+
+                            });
+                        }
+                        else{
+                            console.log("json文件为空");
+                            var win2 = gui.Window.open("./shortMessage.html",{
+                                "width": 150,
+                                "height": 400,
+                                "transparent": true,
+                                "frame": false,
+                                "toolbar": false,
+                                "show_in_taskbar": false
+                            });
+                            process.mainModule.exports.smInintState=1;
+
+                        }
+                        console.log("process.mainModule.exports.smInintState:"+process.mainModule.exports.smInintState);
+
+                    }
+                    else{
+                        console.log(err);
+                    }
+                });
+            }
+            else{
+                console.log("文件不存在");
+            }
+        });
+    }
+    else{
+        win2 = gui.Window.open("./shortMessage.html", {
+            "width": 150,
+            "height": 400,
+            "transparent": true,
+            "frame": false,
+            "toolbar": false,
+            "show_in_taskbar":false
+        });                         
+    }
+
+    console.log("窗口长度:"+allwindows.length);
+   
     win.minimize();
 });
 
-//系统托盘事件
 
-var tray;
-// Get the minimize event
-win.on('minimize', function() {
-    // Hide window
-    this.hide();
-
-    // Show tray
-    tray = new gui.Tray({
-        icon: './image/bg_blue.png'
-    });
-
-    // Show window and remove tray when clicked
-    tray.on('click', function() {
-        win.show();
-        win.setPOsition("center");
-        this.remove();
-        tray = null;
-    });
-});
 
     </script>
 </html>
