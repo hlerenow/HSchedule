@@ -3,14 +3,13 @@
 	"main":"index.html",
     "node-main":"main.js",
 	"window":{
+        "title":"便签",
         "min_width": 700,
         "min_height": 400,
-        "min_height":100,
         "frame":false,
         "toolbar":false,
-        "title":"便签",
         "fullscreen":false,
-        "show_in_taskbar":false,
+        "show_in_taskbar":true,
         "transparent": true,
         "resizeable":false,
         "icon":"./image/favicon.png"

@@ -107,7 +107,7 @@
         </div>
     </body>
     <script>
-// windows 事件
+    // windows 事件
         var gui=require("nw.gui");
         var allwindows=process.mainModule.exports.allWindows;
         win=gui.Window.get();
@@ -176,7 +176,6 @@
         var code = theEvent.keyCode || theEvent.which || theEvent.charCode;
 
         if (code == 9) {
-            console.log(liPos);
             if(liPos==4){
                 liPos=0;
                 $("#boxMenue #floatBg").css("transition-property","width");
@@ -186,6 +185,12 @@
                 $("#boxMenue #floatBg").css("transition-property","left");
             }
             $("#boxMenue #floatBg").css("left",90*parseInt(liPos)-5+"px");
+            return false;
+        }
+        else if(code==13){
+            // alert("模拟点击");
+            $("#boxMenue ul li[idCount="+liPos+"]").trigger("click");
+
             return false;
         }
         return true;
